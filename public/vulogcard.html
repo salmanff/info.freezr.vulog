@@ -1,0 +1,57 @@
+
+
+<div style='font-family: "Lucida Sans Unicode", "Helvetica Neue", "Arial", sans-serif; font-size: 14px; padding:5px;'>
+	<div id="{{_id}}">
+    <a href="/pcard/{{_id}}" style="position: relative; float: right; width: 40px;">
+		  <img src="/apps/info.freezr.vulog/public/static/logo.png" style="width: 40px;"/>
+    </a>
+
+		<div style="font-size:12px; font-style: italic; color:#3f51b5;">
+      Posted by {{_creator}} 
+      <span {{^_date_Modified}}style="display:none"{{/_date_Modified}}> 
+          on {{_date_Modified}}
+      </span>
+    </div>
+		<div style="font-size:12px; font-style: italic; color:#3f51b5; {{^vulog_mark_tags}} display:none {{/vulog_mark_tags}}">
+					Tags: {{#vulog_mark_tags}} {{.}}{{/vulog_mark_tags}}
+		</div>
+
+		<div style="color:#3f51b5; font-size:16px; {{^vulog_mark_notes}}display:none{{/vulog_mark_notes}}"> 
+        {{vulog_mark_notes}}
+    </div>
+		<a {{^title}} style="font-size:14px;" {{/title}} 
+        {{#title}}style="font-size:16px; font-weight: bold;"{{title}} {{/title}} 
+        href={{url}} target="_blank">
+		      {{#title}}{{title}}{{/title}} {{^title}} {{url}} {{/title}}
+		</a>
+		{{#title}}
+    <span style="font-size:16px;{{^author}}display:none{{/author}}"> &nbsp; By: {{author}}</span>
+    <span {{^published}}style="display:none"{{/published}}> 
+          ({{published}})
+      </span>
+		{{/title}}
+  </div>
+
+  <div style="color:#3f51b5; font-size:16px; {{^vulog_mark_quotes}}display:none{{/vulog_mark_quotes}}"> 
+      <span style="font-size: 32px; line-height: 14px;  margin-top: -50px;  position: relative; top: 8px;">&#8220;</span>
+      {{vulog_mark_quotes}}
+      <span style="font-size: 32px; line-height: 14px;  margin-top: -50px;  position: relative; top: 8px;">&#8221;</span>
+  </div>
+
+
+  <style type="text/css">
+    @media all and (max-width: 450px) {.info_freezr_vulog_pix_holder {width:100%;}}  
+    @media all and (min-width: 451px) {.info_freezr_vulog_pix_holder {max-width:250px;}}; 
+  </style>
+
+	<div class="info_freezr_vulog_pix_holder" style="text-align: center; max-height: 200px; overflow: hidden;display:{{^image}}none;{{/image}}{{#image}}block; margin-right:5px;{{/image}} float:left;"><img src="{{image}}" width="100%" ></div>
+	
+  <div style="color:grey; min-width:100px">
+      {{#date}} date: {{date}} {{/date}}
+			{{description}}
+	</div>
+	<div style="color:grey;{{^keywords}}display:none{{/keywords}}">
+		Key words: {{#keywords}} {{.}}{{/keywords}}
+	</div>
+</div>
+

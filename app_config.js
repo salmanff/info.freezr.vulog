@@ -1,0 +1,59 @@
+exports.structure= {
+	"meta": {
+		"app_name":"info.freezr.vulog",
+		"app_display_name":"Vulog History",
+		"app_version": "0.0.101"
+	},
+
+	"pages": {
+		"index": {
+			"page_title":"Vulog history",
+			"html_file":"index.html",
+			"css_files": ["index.css","public/font-awesome.min.css"],
+			"script_files": ["public/vulog_historian.js","index.js"]
+		},
+		"marks": {
+			"page_title":"Vulog marks",
+			"html_file":"marks.html",
+			"css_files": ["index.css","public/font-awesome.min.css"],
+			"script_files": ["public/vulog_historian.js","index.js"]
+		},
+	},
+
+	"public_pages": {
+		"index": {
+			"page_title":"Vulog public history",
+			"html_file":"vulogmustache.html",
+			"css_files": ["vulogmustache.css"],
+			"initial_data": {url: "/v1/pdbq/info.freezr.vulog"}
+		}
+	},
+	
+	"collections": {
+		'logs': {},
+		'userMarks': {
+			'field_names': {
+				'fj_modified_locally': {
+					'type':'date'
+				}
+			}
+		}
+	},
+
+	"files": {
+
+	},
+
+	"permissions": {
+		'publish_favorites' : {
+			"type":"object_delegate",
+			"collections": ["userMarks"],
+			"description": "Publish favorite links",
+			"sharable_groups":["public"],
+			"return_fields": ["author","_creator","description","domain_app","image","keywords","path","purl","title","type","url","vulog_kword2","date","vulog_mark_notes","vulog_mark_tags","_date_Modified","_date_Created"],
+			"search_fields": ["vulog_kword2"],
+			"card":"vulogcard.html"
+		}
+
+	}
+}

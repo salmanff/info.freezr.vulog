@@ -1,0 +1,52 @@
+
+<style type="text/css">
+
+</style>
+
+<div class="vulog_title">
+  <img src="/apps/info.freezr.vulog/public/static/logo.png" class="card_info_freezr_vulog_logo"/>
+  <span class="freezr_public_app_title">Public Posts from Vulog</span>
+  <img src="/apps/info.freezr.vulog/public/static/logo.png" class="card_info_freezr_vulog_logo"/>
+</div>
+
+
+{{#results}}
+<div class="card_info_freezr_vulog_outer">
+	<div>
+    <div class="card_info_freezr_vulog_Notes" {{^vulog_mark_notes}}style="display:none"{{/vulog_mark_notes}}>{{vulog_mark_notes}}</div>
+		<div class="card_info_freezr_vulog_Notes" {{^vulog_mark_quotes}}style="display:none"{{/vulog_mark_quotes}}> <span class="card_info_freezr_vulog_Quotes">&#8220;</span>{{vulog_mark_notes}}<span class="card_info_freezr_vulog_Quotes">&#8221;</span></div>
+		<a class="card_info_freezr_vulog_title" {{^title}} style="font-size:14px;" {{/title}} href={{url}} target="_blank">
+		      {{#title}} {{title}} {{/title}} {{^title}} {{url}} {{/title}}
+		</a>
+		{{#title}}
+		<span class="card_info_freezr_vulog_author" {{^author}}style="display:none"{{/author}}> By: {{author}}</span>
+		{{/title}}
+    <div class="card_info_freezr_vulog_meta" {{^vulog_mark_tags}} style="display:none" {{/vulog_mark_tags}}>
+          Tags: {{#vulog_mark_tags}} {{.}}{{/vulog_mark_tags}}
+    </div>
+
+
+	</div>
+	<table>
+		<tr style="vertical-align:top">
+		<td>
+			<div class="card_info_freezr_vulog_img_holder" {{^image}}style="display:none"{{/image}}><img src="{{image}}" width="150px" ></div>
+		</td>
+			<td>
+				<div class="card_info_freezr_vulog_desc">
+					{{description}}
+				</div>
+				<div class="card_info_freezr_vulog_keywords" {{^keywords}} style="display:none" {{/keywords}}>
+					Key words: {{#keywords}} {{.}}{{/keywords}}
+				</div>
+			</td>
+		</tr>
+	</table>
+
+    <div class="card_info_freezr_vulog_meta" >
+          posted on: {{_date_Modified}}
+    </div>
+
+</div>
+{{/results}}
+

@@ -1,0 +1,61 @@
+body {
+  font-family: "Lucida Sans Unicode", "Helvetica Neue", "Arial", sans-serif; 
+  font-size: 10pt;
+  margin: 0;
+  padding: 0;
+}
+.vulog_title {
+  font-size:18px; font-weight:bold; width:100%; text-align: center; padding: 10px;
+  vertical-align: top;
+}
+ .card_info_freezr_vulog_outer {
+	padding:5px; border:2px solid grey; border-radius:2px; margin: 5px; margin-bottom: 10px; font-family: "Lucida Sans Unicode", "Helvetica Neue", "Arial", sans-serif; 
+    }
+  .card_info_freezr_vulog_logo {
+    width: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+
+  }  
+  .card_info_freezr_vulog_img_holder {
+  	margin: 10px;
+  	width:150px;
+  	max-width:150px;
+  	text-align: center;
+  	max-height: 150px;
+  	overflow: hidden;
+  }
+   .card_info_freezr_vulog_meta {
+  	font-size:12px;
+    font-style: italic;
+    color:#3f51b5;
+  }
+  .card_info_freezr_vulog_Notes {
+  	color:#3f51b5;
+  	font-size:16px;
+    padding-bottom: 10px;
+  }
+
+.card_info_freezr_vulog_Quotes {
+    font-size:16px;
+    line-height: 14px;
+    margin-top: -50px;
+    position: relative;
+    top: 8px;
+}
+  .card_info_freezr_vulog_title {
+  	font-weight: bold;
+  	font-size:16px;
+  }
+  .card_info_freezr_vulog_desc {
+    font-size:16px;
+  	color:grey;
+  }
+  .card_info_freezr_vulog_author {
+  	font-size:16px;
+  }
+  .card_info_freezr_vulog_keywords {
+  	color:black;
+    font-style: italic;
+    font-size: 12px;
+  }
