@@ -139,67 +139,68 @@ var toggleStar = function(which, theStar) { // nb only used for toggling filters
 
 
 var markChangeOnline = function (type, id_type, purl) {
-    console.log({type, id_type, purl});
+    //onsole.log({type, id_type, purl});
     var element = document.getElementById("click_markChange_"+type+"_"+id_type+"_"+purl);
     var doAdd = element.classList.contains("unchosen-star");
     if (id_type=="hasid"){
-        freezr.db.query(function(returnJson) {
-            returnJson = freezr.utils.parse(returnJson);
-            console.log({returnJson})
-            if (returnJson.error || !returnJson.results || !returnJson.results.length>0) {
-                showWarning("Error making change. Make sure you are online")
-            } else {
-                var updatedRecord = returnJson.results[0];
-                console.log({updatedRecord})
-
-                var logdiv = document.getElementById("log}{"+updatedRecord._id);
-                var reservedKeys = ["_date_Created","_date_Modified","_creator","_accessible_By"]
-                for (aKey in reservedKeys) {delete updatedRecord[reservedKeys[aKey]];}
-                console.log({updatedRecord});
-                if (doAdd) {
-                    updatedRecord.vulog_mark_stars = addToListAsUnique(updatedRecord.vulog_mark_stars,type)
+        freezr.db.query(
+            {collection:"userMarks", query_params:{'purl':purl}},
+            function(returnJson) {
+                returnJson = freezr.utils.parse(returnJson);
+                if (returnJson.error || !returnJson.results || !returnJson.results.length>0) {
+                    showWarning("Error making change. Make sure you are online")
                 } else {
-                    var idx = updatedRecord.vulog_mark_stars.indexOf(type);
-                    updatedRecord.vulog_mark_stars.splice(idx,1);
-                } 
-                console.log("updatedRecord.vulog_mark_stars now ",updatedRecord.vulog_mark_stars)
-                freezr.db.update(updatedRecord, function(returnJson) {
-                    returnJson=freezr.utils.parse(returnJson);
-                    console.log("wrote item",returnJson)
-                    if (returnJson && returnJson.success) {
-                        element.classList.remove(doAdd?"unchosen-star":"chosen-star")
-                        element.classList.add(doAdd?"chosen-star":"unchosen-star")
-                        if (type=="fa-bullhorn") {
-                            if (returnJson.confirmed_fields && returnJson.confirmed_fields._id){
-                                console.log("it is a fa-bullhorn steobject access for id "+returnJson._id,returnJson);
-                                var options = { 'action': (doAdd?"grant":"deny"), 'shared_with_group':'public', 'collection': 'userMarks'}
-                                freezr.perms.setObjectAccess(function (returndata) {
-                                  var d = freezr.utils.parse(returndata);
-                                  if (d) console.log("returndata from setObjectAccess ",d)
-                                  if (d.issues) console.log("INTERNAL ERROR: "+d.issues)
-                                  if (d.err || d.error) {
-                                    console.log("got err "+d.code)
-                                    if (d.code=="PermissionNotGranted" || d.code=="PermissionMissing") {
-                                        showWarning("You have not granted the permission to make marks public. Please click on the freezr logo and grant the permission");
+                    var updatedRecord = returnJson.results[0];
+                    
+                    var logdiv = document.getElementById("log}{"+updatedRecord._id);
+                    var reservedKeys = ["_date_Created","_date_Modified","_creator","_accessible_By"]
+                    for (aKey in reservedKeys) {delete updatedRecord[reservedKeys[aKey]];}
+                    if (doAdd) {
+                        updatedRecord.vulog_mark_stars = addToListAsUnique(updatedRecord.vulog_mark_stars,type)
+                    } else {
+                        var idx = updatedRecord.vulog_mark_stars.indexOf(type);
+                        updatedRecord.vulog_mark_stars.splice(idx,1);
+                    } 
+                    freezr.db.update(
+                        updatedRecord, 
+                        {collection :'userMarks'},
+                        function(returnJson) {
+                            returnJson=freezr.utils.parse(returnJson);
+                            //onsole.log("wrote item",returnJson)
+                            if (returnJson && returnJson.success) {
+                                element.classList.remove(doAdd?"unchosen-star":"chosen-star")
+                                element.classList.add(doAdd?"chosen-star":"unchosen-star")
+                                if (type=="fa-bullhorn") {
+                                    if (returnJson.confirmed_fields && returnJson.confirmed_fields._id){
+                                        var options = { 'action': (doAdd?"grant":"deny"), 'shared_with_group':'public', 'collection': 'userMarks'}
+                                        freezr.perms.setObjectAccess(function (returndata) {
+                                          var d = freezr.utils.parse(returndata);
+                                          if (d.issues) console.log("INTERNAL ERROR: ",d)
+                                          if (d.err || d.error) {
+                                            console.log("got err "+d.code)
+                                            if (d.code=="PermissionNotGranted" || d.code=="PermissionMissing") {
+                                                showWarning("You have not granted the permission to make marks public. Please click on the freezr logo and grant the permission");
+                                            } else {
+                                                showWarning("The mark was not made public due to an internal error - try unmarking and marking again");
+                                            }
+                                          } else {
+                                            console.log("success marking as public")
+                                          }
+                                        }, 'publish_favorites', returnJson.confirmed_fields._id, options)
                                     } else {
-                                        showWarning("The mark was not made public due to an internal error - try unmarking and marking again");
+                                            showWarning("The mark was not made public due to an internal error - try unmarking and marking again");
+                                            console.log("Error marking public - no _id returned from server when marking");
                                     }
-                                  } else {
-                                    console.log("success markign as public")
-                                  }
-                                }, 'publish_favorites', returnJson.confirmed_fields._id, options)
+                                }
                             } else {
-                                    showWarning("The mark was not made public due to an internal error - try unmarking and marking again");
-                                    console.log("Error marking public - no _id returned from server when marking");
+                                console.log("err deleting ",returnJson)
+                                showWarning("Error removing log from server.");
                             }
                         }
-                    } else {
-                        console.log("err deleting ",returnJson)
-                        showWarning("Error removing log from server.");
-                    }
-                },  "userMarks" )
+                    )
+                }
             }
-        }, null, {collection:"userMarks", query_params:{'purl':purl}} )
+        )
     }
 }
 var resetSearch = function(what) {
@@ -238,35 +239,32 @@ var showWarning = function(aText) {
 
 
 var removeHistItem  = function(type, id) {
-    console.log("trying to remove ",type," _ ",id)
     if (type=="id"){
-        if (this.syncing) {
-            this.divs.showWarning("Please retry after syncing is complete.")
+        if (web_historian.syncing) {
+            showWarning("Please retry after syncing is complete.")
         } else {
             var theDiv = document.getElementById("click_removeHistItem_id_"+id)
             if (theDiv && theDiv.className=="removeHistItem" && !removals.inprogress) {
                 removals.history_items.push(type+"_"+id);
                 removeNextHistoryItem();
             } else {
-                this.divs.showWarning("Error fnding id "+id+" - item already removed??")
+                showWarning("Error fnding id "+id+" - item already removed??")
             }   
         }
         // make sure freezr is not syncing and ping to make sure online
     } else if (type=="mod") {
-        console.log("removing mod time ",id)
-        if (this.syncing) {
-            this.divs.showWarning("Please retry after syncing is complete.")
+        if (web_historian.syncing) {
+            showWarning("Please retry after syncing is complete.")
         } else {
             var theDiv = document.getElementById("click_removeHistItem_mod_"+id)
             if (theDiv) theDiv.className="removedItem";
-            this.divs.removeOfflineItem(id, "logs", function(response) {
-                console.log("Successful removal - change div here for id "+id)
+            web_historian.divs.removeOfflineItem(id, "logs", function(response) {
                 if (response && response.success && theDiv) {
                     if (theDiv) theDiv.innerHTML="Removed";
                 } else {
                     console.log("err deleting ",response)
                     if (theDiv) theDiv.innerHTML="Error - try later";
-                    this.divs.showWarning("Error removing item - please refresh")
+                    showWarning("Error removing item - please refresh")
                 }            
             });
         }
@@ -275,77 +273,85 @@ var removeHistItem  = function(type, id) {
 var removeNextHistoryItem  = function() {
     if (removals.history_items.length>0) {
         var type_id=removals.history_items.pop();
-        if (type_id.split("_").length<2 || type_id.indexOf("id_"!=0)) {
-            this.divs.showWarning("Error in type_id "+type_id)
-            this.removeNextHistoryItem();
+        if (type_id.split("_").length<2 || type_id.indexOf("id_")!=0) {
+            showWarning("Error in type_id "+type_id)
+            removeNextHistoryItem();
         } else {
             var type = type_id.split('_')[0];
-            var id = type_id.split('_').splice(0,1)[0];
+            var id = type_id.split('_')[1];
             var theDiv = document.getElementById("click_removeHistItem_"+type_id);
             if (theDiv) theDiv.className="removedItem";
-            console.log("removing ",type," _ ",id);
-            freezr.db.getById(id, function(returnJson) {
-                returnJson=freezr.utils.parse(returnJson);
-                console.log({returnJson})
-                if (returnJson.error || !returnJson.results || !returnJson.results._id) {
-                    this.divs.showWarning("could not find item in your freezr - id:"+id)
-                    if (theDiv) theDiv.innerHTML="Error";
-                    this.removeNextHistoryItem();
-                } else {
-                    console.log("deleting id "+returnJson.results._id)
-                    var updatedRecord = {}
-                    var reservedKeys = ["_date_Created","_date_Modified","_creator","_public","_sharing"]
-                    for (aKey in returnJson.results) {
-                        if (returnJson.results.hasOwnProperty(aKey) && reservedKeys.indexOf(aKey)<0) {updatedRecord[aKey]=null;}
-                    }
-                    updatedRecord._id = returnJson.results._id;
-                    updatedRecord.fj_deleted =true;
-                    console.log({updatedRecord})
-                    freezr.db.update(updatedRecord, function(returnJson) {
-                        returnJson=freezr.utils.parse(returnJson);
-                        if (returnJson && returnJson.success) {
-                            if (theDiv) theDiv.innerHTML="Removed";
-                        } else {
-                            console.log("err deleting ",returnJson)
-                            this.divs.showWarning("Error removing item "+id);
+            freezr.db.getById(
+                id, 
+                {collection_name: 'logs'},
+                function(returnJson) {
+                    returnJson=freezr.utils.parse(returnJson);
+                    if (returnJson.error || !returnJson.results || !returnJson.results._id) {
+                        showWarning("could not find item in your freezr - id:"+id)
+                        if (theDiv) theDiv.innerHTML="Error";
+                        removeNextHistoryItem();
+                    } else {
+                        var updatedRecord = {}
+                        var reservedKeys = ["_date_Created","_date_Modified","_creator","_public","_sharing"]
+                        for (aKey in returnJson.results) {
+                            if (returnJson.results.hasOwnProperty(aKey) && reservedKeys.indexOf(aKey)<0) {updatedRecord[aKey]=null;}
                         }
-                        this.removeNextHistoryItem();
-                    }, "logs")
+                        updatedRecord._id = returnJson.results._id;
+                        updatedRecord.fj_deleted =true;
+                        freezr.db.update(
+                            updatedRecord, 
+                            {collection:'logs'},
+                            function(returnJson) {
+                                returnJson=freezr.utils.parse(returnJson);
+                                if (returnJson && returnJson.success) {
+                                    if (theDiv) theDiv.innerHTML="Removed";
+                                } else {
+                                    console.log("err deleting ",returnJson)
+                                    showWarning("Error removing item "+id);
+                                }
+                                removeNextHistoryItem();
+                            }
+                        )
+                    }
                 }
-            }, "logs") 
+            ) 
         }
     } else {
         removals.inprogress = false;
-        if (this.divs.changeItemsCallBack) {this.divs.changeItemsCallBack();}
+        if (web_historian.divs.changeItemsCallBack) {web_historian.divs.changeItemsCallBack();}
 
     }
 }
 var removeMark  = function(id) {
-    freezr.db.getById(encodeURIComponent(id), function(returnJson) {
-        returnJson=freezr.utils.parse(returnJson);
-        var logdiv = document.getElementById("log}{"+id);
-        console.log({returnJson})
-        if (returnJson.error || !returnJson.results || !returnJson.results._id) {
-            logdiv.innerHTML=logdiv.innerHTML+"<div class='removeError'>Error finding log on server - could not change this.</div>"
-        } else {
-            console.log("deleting id "+returnJson.results._id)
-            var updatedRecord = {}
-            var reservedKeys = ["_date_Created","_date_Modified","_creator","_public","_sharing"]
-            for (aKey in returnJson.results) {
-                if (returnJson.results.hasOwnProperty(aKey) && reservedKeys.indexOf(aKey)<0) {updatedRecord[aKey]=null;}
-            }
-            updatedRecord._id = returnJson.results._id;
-            updatedRecord.fj_deleted =true;
-            console.log({updatedRecord})
-            freezr.db.update(updatedRecord, function(returnJson) {
-                returnJson=freezr.utils.parse(returnJson);
-                if (returnJson && returnJson.success) {
-                    logdiv.style.display="none"
-                } else {
-                    console.log("err deleting ",returnJson)
-                    logdiv.innerHTML=logdiv.innerHTML+"<div class='removeError'>Error removing log from server.</div>"
+    freezr.db.getById(
+        encodeURIComponent(id), 
+        {'collection_name':"userMarks"},
+        function(returnJson) {
+            returnJson=freezr.utils.parse(returnJson);
+            var logdiv = document.getElementById("log}{"+id);
+            if (returnJson.error || !returnJson.results || !returnJson.results._id) {
+                logdiv.innerHTML=logdiv.innerHTML+"<div class='removeError'>Error finding log on server - could not change this.</div>"
+            } else {
+                var updatedRecord = {}
+                var reservedKeys = ["_date_Created","_date_Modified","_creator","_public","_sharing"]
+                for (aKey in returnJson.results) {
+                    if (returnJson.results.hasOwnProperty(aKey) && reservedKeys.indexOf(aKey)<0) {updatedRecord[aKey]=null;}
                 }
-            }, "userMarks")
-        }
-    }, "userMarks")
+                updatedRecord._id = returnJson.results._id;
+                updatedRecord.fj_deleted =true;
+                freezr.db.update(
+                    updatedRecord,
+                    {collection: 'userMarks'},
+                    function(returnJson) {
+                        returnJson=freezr.utils.parse(returnJson);
+                        if (returnJson && returnJson.success) {
+                            logdiv.style.display="none"
+                        } else {
+                            console.log("err deleting ",returnJson)
+                            logdiv.innerHTML=logdiv.innerHTML+"<div class='removeError'>Error removing log from server.</div>"
+                        }
+                    }
+                )
+            }
+        })
 }

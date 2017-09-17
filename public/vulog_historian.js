@@ -252,22 +252,27 @@ vulog_historian.prototype.nowVulogSearch = function (what, searchTerms, max_item
         } else if (what=="marks" && self.divs.resetFiltersDivId && document.getElementById(self.divs.resetFiltersDivId)){
             document.getElementById(self.divs.resetFiltersDivId).style = "display:"+  ( (searchTerms || (self.star_filters && self.star_filters.length>0))? "block":"none");
         }
-    
-        freezr.db.query(function (returndata) {
+        freezr.db.query(
+            {'collection':(what=="history"?'logs':"userMarks"), 'count':self.divs.max_items_fetch, 'query_params':query_params  },
+            function (returndata) {
             returndata = JSON.parse(returndata);
             self.showHistoryItems(what, returndata);
-        }, null, {'collection':(what=="history"?'logs':"userMarks"), 'count':self.divs.max_items_fetch, 'query_params':query_params  } );
+            }
+        );
 
     } else  if (what=="marks" && self.divs.page_type=="public"){
         //onsole.log("public marks returned",self.divs.max_items_fetch,self.itemsfetched)
-        freezr.db.publicquery(function (returndata) {
-            returndata = JSON.parse(returndata);
-            self.showHistoryItems("marks", returndata);
-        }, {'count':self.divs.max_items_fetch, 'skip': self.itemsfetched, 'app_name':'info.freezr.vulog'  } );
+        freezr.db.publicquery(
+            {'count':self.divs.max_items_fetch, 'skip': self.itemsfetched, 'app_name':'info.freezr.vulog'},
+            function (returndata) {
+                returndata = JSON.parse(returndata);
+                self.showHistoryItems("marks", returndata);
+            }
+        );
     } else  { // extension
         var query_params = {
             what            : what,
-            wordsToFind     : ((searchTerms & searchTerms.length>0)? searchTerms.split(" "):[]),
+            wordsToFind     : ((searchTerms && searchTerms.length>0)? searchTerms.split(" "):[]),
             itemsfetched    : self.itemsfetched,
             oldest_record   : self.oldest_record,
             max_items_fetch : self.divs.max_items_fetch,
